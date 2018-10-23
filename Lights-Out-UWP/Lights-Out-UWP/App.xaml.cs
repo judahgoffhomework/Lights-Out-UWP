@@ -7,6 +7,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -47,6 +48,16 @@ namespace Lights_Out_UWP
             {
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
+                rootFrame.Navigated += OnNavigated;
+
+                SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
+
+                // Determine if Back button should be visible
+                SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility =
+                    rootFrame.CanGoBack ?
+                    AppViewBackButtonVisibility.Visible :
+                    AppViewBackButtonVisibility.Collapsed;
+
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
@@ -70,6 +81,25 @@ namespace Lights_Out_UWP
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
+            }
+        }
+
+        private void OnNavigated(object sender, NavigationEventArgs e)
+        {
+            // Determine if Back button should be visible
+            SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility =
+                ((Frame)sender).CanGoBack ?
+                AppViewBackButtonVisibility.Visible :
+                AppViewBackButtonVisibility.Collapsed;
+        }
+
+        private void OnBackRequested(object sender, BackRequestedEventArgs e)
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame.CanGoBack)
+            {
+                e.Handled = true;
+                rootFrame.GoBack();
             }
         }
 
